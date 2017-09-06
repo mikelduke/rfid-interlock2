@@ -2,6 +2,7 @@ package com.mikelduke.rfid.interlock2;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,14 +13,20 @@ public class ConsoleReader implements Runnable {
 	
 	private boolean run = true;
 	private final AccessControlClient client;
+	private final InputStream is;
+	
+	public ConsoleReader(AccessControlClient client, InputStream is) {
+		this.is = is;
+		this.client = client;
+	}
 	
 	public ConsoleReader(AccessControlClient client) {
-		this.client = client;
+		this(client, System.in);
 	}
 	
 	@Override
 	public void run() {
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		
 		while (run) {
 			System.out.print("Enter ID: ");
