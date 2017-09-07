@@ -1,5 +1,6 @@
-pid.txt
 
+pid.txt
+accessInfo.json
 
 # Created by https://www.gitignore.io/api/eclipse,gradle,maven,java
 

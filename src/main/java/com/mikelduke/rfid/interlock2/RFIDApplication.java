@@ -1,8 +1,15 @@
 package com.mikelduke.rfid.interlock2;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import org.codehaus.jackson.map.ObjectMapper;
 
 import com.mikelduke.rfid.interlock2.makertracker.MakerTrackerClient;
 
@@ -17,6 +24,8 @@ public class RFIDApplication {
 	private final AccessControlClient client;
 	private final ConsoleReader consoleReader;
 	private final Thread consoleReaderThread;
+	
+	private final ScheduledExecutorService backupExecutorService = Executors.newSingleThreadScheduledExecutor();
 	
 	public static void main(String[] args) {
 		LOGGER.info("RFID Interlock 2");
@@ -38,7 +47,23 @@ public class RFIDApplication {
 		consoleReaderThread = new Thread(consoleReader);
 		consoleReaderThread.start();
 		
-		//TODO Need a timer to update and save the accessInfo object for use as a backup when service is down
+		backupExecutorService.scheduleAtFixedRate(()-> {
+			try {
+				LOGGER.logp(Level.INFO, CLAZZ, "backupService", "Retrieving backup Access Info");
+				
+				accessInfo = client.getAccessInfo();
+				ObjectMapper mapper = new ObjectMapper();
+
+				File f = new File("accessInfo.json");
+				f.delete();
+				mapper.writeValue(new FileOutputStream(f), accessInfo);
+				LOGGER.logp(Level.INFO, CLAZZ, "backupService", "Backup saved to " + f.getAbsolutePath());
+			} catch (Throwable e) {
+				LOGGER.logp(Level.SEVERE, CLAZZ, "backupService", "Error saving accessInfo backup", e);
+			}
+		}, 0, Long.parseLong(
+				Configuration.getProperties().getProperty(Configuration.BACKUP_REFRESH_MINS, "60")), 
+				TimeUnit.MINUTES);
 	}
 
 	private void loadConfig(String[] args) {
