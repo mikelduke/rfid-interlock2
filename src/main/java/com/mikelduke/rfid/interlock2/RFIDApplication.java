@@ -47,6 +47,12 @@ public class RFIDApplication {
 		consoleReaderThread = new Thread(consoleReader);
 		consoleReaderThread.start();
 		
+		if (Boolean.parseBoolean(Configuration.getProperty(Configuration.ENABLE_BACKUP, "true"))) {
+			setupBackupTask();
+		}
+	}
+
+	private void setupBackupTask() {
 		backupExecutorService.scheduleAtFixedRate(()-> {
 			try {
 				LOGGER.logp(Level.INFO, CLAZZ, "backupService", "Retrieving backup Access Info");
