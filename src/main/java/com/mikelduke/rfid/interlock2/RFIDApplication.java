@@ -1,6 +1,7 @@
 package com.mikelduke.rfid.interlock2;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.concurrent.Executors;
@@ -48,7 +49,22 @@ public class RFIDApplication {
 		consoleReaderThread.start();
 		
 		if (Boolean.parseBoolean(Configuration.getProperty(Configuration.ENABLE_BACKUP, "true"))) {
+			loadLastBackup();
 			setupBackupTask();
+		}
+	}
+
+	private void loadLastBackup() {
+		ObjectMapper mapper = new ObjectMapper();
+		File f = new File("accessInfo.json");
+		if (f.exists() && f.canRead()) {
+			try {
+				AccessInfo ai = mapper.readValue(new FileInputStream(f), AccessInfo.class);
+				this.accessInfo = ai;
+				LOGGER.logp(Level.INFO, CLAZZ, "loadLastBackup", "Loaded last backup from file");
+			} catch (IOException e) {
+				LOGGER.logp(Level.WARNING, CLAZZ, "loadLastBackup", "Error loading last AccessInfo Json File", e);
+			}
 		}
 	}
 
