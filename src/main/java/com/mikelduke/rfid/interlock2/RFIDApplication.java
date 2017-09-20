@@ -24,9 +24,6 @@ public class RFIDApplication {
 	
 	private final AccessControlClient client;
 	
-	private ConsoleReader consoleReader = null;
-	private Thread consoleReaderThread = null;
-	
 	private final ScheduledExecutorService backupExecutorService = Executors.newSingleThreadScheduledExecutor();
 	
 	public static void main(String[] args) {
@@ -51,9 +48,8 @@ public class RFIDApplication {
 		}
 		
 		if (Boolean.parseBoolean(Configuration.getProperty(Configuration.ENABLE_CONSOLE, "true"))) {
-			consoleReader = new ConsoleReader(client);
-			consoleReaderThread = new Thread(consoleReader);
-			consoleReaderThread.start();
+			ConsoleReader consoleReader = new ConsoleReader(client);
+			consoleReader.start(); //loops continuously and blocks - needs to be last in startup
 		}
 	}
 

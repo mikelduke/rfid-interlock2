@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class ConsoleReader implements Runnable {
+public class ConsoleReader {
 	private static final String CLAZZ = ConsoleReader.class.getName();
 	private static final Logger LOGGER = Logger.getLogger(CLAZZ);
 	
@@ -24,8 +24,7 @@ public class ConsoleReader implements Runnable {
 		this(client, System.in);
 	}
 	
-	@Override
-	public void run() {
+	public void start() {
 		BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		
 		while (run) {
@@ -42,7 +41,9 @@ public class ConsoleReader implements Runnable {
 	}
 
 	private void handleInput(String input) {
-		if (input.equalsIgnoreCase("quit") || input.equalsIgnoreCase("exit")) {
+		if (input.isEmpty()) {
+			//do nothing
+		} else if (input.equalsIgnoreCase("quit") || input.equalsIgnoreCase("exit")) {
 			LOGGER.info("Exiting Application");
 			System.exit(0);
 			return;
