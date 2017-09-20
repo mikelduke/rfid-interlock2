@@ -74,11 +74,13 @@ public class RFIDApplication {
 				LOGGER.logp(Level.INFO, CLAZZ, "backupService", "Retrieving backup Access Info");
 				
 				accessInfo = client.getAccessInfo();
-				ObjectMapper mapper = new ObjectMapper();
 
 				File f = new File("accessInfo.json");
 				f.delete();
-				mapper.writeValue(new FileOutputStream(f), accessInfo);
+				
+				new ObjectMapper()
+						.writerWithDefaultPrettyPrinter()
+						.writeValue(new FileOutputStream(f), accessInfo);
 				LOGGER.logp(Level.INFO, CLAZZ, "backupService", "Backup saved to " + f.getAbsolutePath());
 			} catch (Throwable e) {
 				LOGGER.logp(Level.SEVERE, CLAZZ, "backupService", "Error saving accessInfo backup", e);
