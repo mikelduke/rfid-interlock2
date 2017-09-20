@@ -14,6 +14,7 @@ public class Configuration {
 	public static final String PORT = "port";
 	public static final String BACKUP_REFRESH_MINS = "backup-refresh-mins";
 	public static final String ENABLE_BACKUP = "backup-refresh-enabled";
+	public static final String ENABLE_CONSOLE = "enable-console";
 	
 	public static void load() throws FileNotFoundException, IOException {
 		load(null);

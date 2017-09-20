@@ -23,8 +23,9 @@ public class RFIDApplication {
 	private volatile AccessInfo accessInfo = null;
 	
 	private final AccessControlClient client;
-	private final ConsoleReader consoleReader;
-	private final Thread consoleReaderThread;
+	
+	private ConsoleReader consoleReader = null;
+	private Thread consoleReaderThread = null;
 	
 	private final ScheduledExecutorService backupExecutorService = Executors.newSingleThreadScheduledExecutor();
 	
@@ -44,13 +45,15 @@ public class RFIDApplication {
 		client = new MakerTrackerClient();
 		client.configure(Configuration.getProperties());
 		
-		consoleReader = new ConsoleReader(client);
-		consoleReaderThread = new Thread(consoleReader);
-		consoleReaderThread.start();
-		
 		if (Boolean.parseBoolean(Configuration.getProperty(Configuration.ENABLE_BACKUP, "true"))) {
 			loadLastBackup();
 			setupBackupTask();
+		}
+		
+		if (Boolean.parseBoolean(Configuration.getProperty(Configuration.ENABLE_CONSOLE, "true"))) {
+			consoleReader = new ConsoleReader(client);
+			consoleReaderThread = new Thread(consoleReader);
+			consoleReaderThread.start();
 		}
 	}
 
