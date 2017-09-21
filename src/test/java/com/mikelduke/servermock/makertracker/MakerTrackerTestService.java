@@ -24,7 +24,15 @@ public class MakerTrackerTestService {
 				.build();
 		}, JsonTransformer::toJson);
 		
-		Spark.get("/api/interlock/:toolid/rfids/:rfid", (req, res) -> "1000");
+		Spark.get("/api/interlock/:toolid/rfids/:rfid", (req, res) -> {
+			long rfid = 1; 
+			try {
+				rfid = Long.parseLong(req.params("rfid"));
+			} catch (NumberFormatException e) {}
+			
+			long time = 1000 * rfid;
+			return time + "";
+		});
 
 		Spark.awaitInitialization();
 	}
