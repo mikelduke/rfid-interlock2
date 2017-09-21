@@ -49,13 +49,18 @@ public class ConsoleReader {
 			return;
 		} else if (input.equalsIgnoreCase("stop")) {
 			//TODO Turn off power, also need to listen for a hardware button too
+			InterlockController.getInstance("1").cancel();
 		} else if (input.equalsIgnoreCase("getAccessInfo")) {
 			System.out.println(client.getAccessInfo());
+		} else if (input.equalsIgnoreCase("timeleft")) {
+			System.out.println("Time Left: " + InterlockController.getInstance("1").getTimeLeft());
 		} else {
 			try {
 				long accessTimeMS = client.getAccessTime(input);
 			
 				System.out.println("Access Time: " + accessTimeMS); //TODO Enable power for some time
+				
+				InterlockController.getInstance("1").enable(accessTimeMS); //TODO Just one instance for now
 			} catch (Exception e) {
 				LOGGER.logp(Level.SEVERE, CLAZZ, "handleInput", "Error thrown when retrieving access time", e);
 			}
