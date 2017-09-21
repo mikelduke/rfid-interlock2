@@ -2,10 +2,13 @@ package com.mikelduke.rfid.interlock2;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
+
+import com.mikelduke.rfid.interlock2.io.Interlock;
 
 public class InterlockController {
 	//TODO This should be the interface to control the interlock hardware
@@ -13,14 +16,16 @@ public class InterlockController {
 	private static Map<String, InterlockController> instances = new HashMap<>();
 	
 	private final ScheduledExecutorService interlockContollerExecutorService = Executors.newSingleThreadScheduledExecutor();
+	private final String name;
 	
 	private volatile ScheduledFuture<?> currentUnlockTask;
+	private Interlock interlock;
 	
 	public static InterlockController getInstance(String name) {
 		if (instances.get(name) == null) {
 			synchronized (instances) {
 				if (instances.get(name) == null) {
-					InterlockController instance = new InterlockController();
+					InterlockController instance = new InterlockController(name);
 					instances.put(name, instance);
 				}
 			}
@@ -29,10 +34,20 @@ public class InterlockController {
 		return instances.get(name);
 	}
 
-	private InterlockController() { }
+	private InterlockController(String name) {
+		this.name = name;
+	}
 
-	public void configure(Configuration config) {
-		//TODO load ports etc
+	public void configure(Properties config) {
+		try {
+			interlock = Interlock.Factory.
+					getNewInterlock(this.name, 
+							Configuration.getProperty(Configuration.INTERLOCK_IMPL,
+									"com.mikelduke.rfid.interlock2.io.ConsoleOnlyInterlock"));
+		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+			System.err.println("Error loading interlock implementation");
+			e.printStackTrace();
+		}
 	}
 
 	public void enable(long ms) {
@@ -42,11 +57,11 @@ public class InterlockController {
 			currentUnlockTask.cancel(true);
 		}
 		
-		//TODO Turn on
+		interlock.enable();
 		
 		this.currentUnlockTask = interlockContollerExecutorService.schedule(()-> {
 			System.out.println("Interlock disabled, time is up");
-			//TODO Turn off
+			interlock.disable();
 		}, ms, TimeUnit.MILLISECONDS);
 	}
 	
@@ -67,8 +82,7 @@ public class InterlockController {
 			this.currentUnlockTask.cancel(true);
 		}
 		
-		//TODO Turn off
-		
+		interlock.disable();
 		System.out.println("Cancelled");
 	}
 	

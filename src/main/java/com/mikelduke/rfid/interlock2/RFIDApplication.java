@@ -42,6 +42,8 @@ public class RFIDApplication {
 		client = new MakerTrackerClient();
 		client.configure(Configuration.getProperties());
 		
+		InterlockController.getInstance("1").configure(Configuration.getProperties());
+		
 		if (Boolean.parseBoolean(Configuration.getProperty(Configuration.ENABLE_BACKUP, "true"))) {
 			loadLastBackup();
 			setupBackupTask();

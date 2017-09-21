@@ -15,6 +15,7 @@ public class Configuration {
 	public static final String BACKUP_REFRESH_MINS = "backup-refresh-mins";
 	public static final String ENABLE_BACKUP = "backup-refresh-enabled";
 	public static final String ENABLE_CONSOLE = "enable-console";
+	public static final String INTERLOCK_IMPL = "interlock";
 	
 	public static void load() throws FileNotFoundException, IOException {
 		load(null);
