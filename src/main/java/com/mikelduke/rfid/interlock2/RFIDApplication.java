@@ -12,6 +12,8 @@ import java.util.logging.Logger;
 
 import org.codehaus.jackson.map.ObjectMapper;
 
+import com.mikelduke.rfid.interlock2.io.ConsoleReader;
+import com.mikelduke.rfid.interlock2.io.RFIDReader;
 import com.mikelduke.rfid.interlock2.makertracker.MakerTrackerClient;
 
 import spark.Spark;
@@ -49,9 +51,14 @@ public class RFIDApplication {
 			setupBackupTask();
 		}
 		
-		if (Boolean.parseBoolean(Configuration.getProperty(Configuration.ENABLE_CONSOLE, "true"))) {
-			ConsoleReader consoleReader = new ConsoleReader(client);
-			consoleReader.start(); //loops continuously and blocks - needs to be last in startup
+		String rfidClass = Configuration.getProperty(Configuration.READER_IMPL, ConsoleReader.class.getName());
+		try {
+			RFIDReader rfidReader = (RFIDReader) Class.forName(rfidClass).newInstance();
+			rfidReader.configure(client, Configuration.getProperties());
+			rfidReader.start(); //loops continuously and blocks - needs to be last in startup
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			LOGGER.logp(Level.SEVERE, CLAZZ, "main", "Error creating instance of " + rfidClass, e);
+			System.exit(1);
 		}
 	}
 

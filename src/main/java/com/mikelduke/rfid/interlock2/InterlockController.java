@@ -8,6 +8,7 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
+import com.mikelduke.rfid.interlock2.io.ConsoleOnlyInterlock;
 import com.mikelduke.rfid.interlock2.io.Interlock;
 
 public class InterlockController {
@@ -43,7 +44,7 @@ public class InterlockController {
 			interlock = Interlock.Factory.
 					getNewInterlock(this.name, 
 							Configuration.getProperty(Configuration.INTERLOCK_IMPL,
-									"com.mikelduke.rfid.interlock2.io.ConsoleOnlyInterlock"));
+									ConsoleOnlyInterlock.class.getName()));
 		} catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
 			System.err.println("Error loading interlock implementation");
 			e.printStackTrace();

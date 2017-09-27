@@ -11,7 +11,7 @@ public class ConsoleOnlyInterlock implements Interlock {
 
 	@Override
 	public void configure(Properties config) {
-		// TODO Auto-generated method stub
+		//Nothing to configure
 	}
 
 	@Override
