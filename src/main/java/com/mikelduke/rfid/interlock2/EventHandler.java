@@ -13,9 +13,11 @@ public class EventHandler implements EventListener {
 	private static final Logger LOGGER = Logger.getLogger(CLAZZ);
 	
 	private AccessControlClient client;
+	private RFIDApplication app;
 	
-	public void configure(AccessControlClient client, Properties p) {
+	public void configure(RFIDApplication app, AccessControlClient client, Properties p) {
 		this.client = client;
+		this.app = app;
 	}
 
 	@Override
@@ -32,11 +34,18 @@ public class EventHandler implements EventListener {
 				InterlockController.getInstance(InterlockController.DEFAULT).enable(accessTimeMS);
 			} catch (Exception ex) {
 				LOGGER.logp(Level.SEVERE, CLAZZ, "update", "Error thrown when retrieving access time", ex);
+				
+				if (app.getAccessInfo().getRfidList().contains(e.getMessage())) {
+					LOGGER.logp(Level.INFO, CLAZZ, "update", 
+							"Enabling Interlock using backup info for user " + e.getMessage() + 
+							" and time " + app.getAccessInfo().getAccessTimeMS());
+					InterlockController.getInstance(InterlockController.DEFAULT).enable(app.getAccessInfo().getAccessTimeMS());
+				}
 			}
 		} else if (e.getType().equals(EventType.STOP)) {
 			InterlockController.getInstance(InterlockController.DEFAULT).cancel();
 		} else if (e.getType().equals(EventType.INFO)) {
-			LOGGER.logp(Level.INFO, CLAZZ, "update", client.getAccessInfo().toString());
+			LOGGER.logp(Level.INFO, CLAZZ, "update", app.getAccessInfo().toString());
 		} else if (e.getType().equals(EventType.TIME_LEFT)) {
 			long time = InterlockController.getInstance(InterlockController.DEFAULT).getTimeLeft();
 			time = Math.max(time,  0);

@@ -12,8 +12,6 @@ import com.mikelduke.rfid.interlock2.io.ConsoleOnlyInterlock;
 import com.mikelduke.rfid.interlock2.io.Interlock;
 
 public class InterlockController {
-	//TODO This should be the interface to control the interlock hardware
-
 	public static final String DEFAULT = "default";
 	
 	private static Map<String, InterlockController> instances = new HashMap<>();

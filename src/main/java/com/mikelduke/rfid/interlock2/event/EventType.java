@@ -6,4 +6,5 @@ public enum EventType {
 	INFO,
 	TIME_LEFT,
 	EXIT,
+	ERROR
 }

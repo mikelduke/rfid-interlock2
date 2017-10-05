@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -23,7 +24,7 @@ public class RFIDApplication {
 	private static final String CLAZZ = RFIDApplication.class.getName();
 	private static final Logger LOGGER = Logger.getLogger(CLAZZ);
 	
-	private volatile AccessInfo accessInfo = null; //TODO use backup when service not up
+	private volatile AccessInfo accessInfo = null;
 	
 	private final AccessControlClient client;
 	
@@ -47,13 +48,11 @@ public class RFIDApplication {
 		//TODO Enable configuring more than one instance
 		InterlockController.getInstance(InterlockController.DEFAULT).configure(Configuration.getProperties());
 		
-		if (Boolean.parseBoolean(Configuration.getProperty(Configuration.ENABLE_BACKUP, "true"))) {
-			loadLastBackup();
-			setupBackupTask();
-		}
+		loadLastBackup();
+		setupBackupTask();
 		
 		eh = new EventHandler();
-		eh.configure(client, Configuration.getProperties());
+		eh.configure(this, client, Configuration.getProperties());
 		
 		String rfidClass = Configuration.getProperty(Configuration.READER_IMPL, ConsoleReader.class.getName());
 		try {
@@ -83,9 +82,24 @@ public class RFIDApplication {
 				this.accessInfo = ai;
 				LOGGER.logp(Level.INFO, CLAZZ, "loadLastBackup", "Loaded last backup from file");
 			} catch (IOException e) {
-				LOGGER.logp(Level.WARNING, CLAZZ, "loadLastBackup", "Error loading last AccessInfo Json File", e);
+				LOGGER.logp(Level.WARNING, CLAZZ, "loadLastBackup", "Error loading last AccessInfo Json File user default", e);
+				loadDefaultInfo();
 			}
+		} else {
+			loadDefaultInfo();
 		}
+	}
+
+	private void loadDefaultInfo() {
+		AccessInfo ai = AccessInfo.builder()
+				.accessTimeMS(Long.parseLong(Configuration.getProperty(Configuration.DEFAULT_ACCESS_TIME, "900000")))
+				.toolId(Configuration.getProperty(Configuration.TOOL_ID, "unknown"))
+				.rfidList(Arrays.asList(new String[] {} ))
+				.build();
+		
+		LOGGER.logp(Level.WARNING, CLAZZ, "loadDefaultInfo", "Backup not found, using default settings: " + ai);
+		
+		this.accessInfo = ai;
 	}
 
 	private void setupBackupTask() {
@@ -103,7 +117,7 @@ public class RFIDApplication {
 						.writeValue(new FileOutputStream(f), accessInfo);
 				LOGGER.logp(Level.INFO, CLAZZ, "backupService", "Backup saved to " + f.getAbsolutePath());
 			} catch (Throwable e) {
-				LOGGER.logp(Level.SEVERE, CLAZZ, "backupService", "Error saving accessInfo backup", e);
+				LOGGER.logp(Level.SEVERE, CLAZZ, "backupService", "Error retrieving accessInfo backup", e);
 			}
 		}, 0, Long.parseLong(
 				Configuration.getProperties().getProperty(Configuration.BACKUP_REFRESH_MINS, "60")), 

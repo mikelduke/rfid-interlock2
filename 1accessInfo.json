@@ -1,0 +1,7 @@
+{
+  "toolId" : "123",
+  "accessTimeMS" : 1000,
+  "rfidList" : [ "rfid-1", "rfid-2" ],
+  "retrievedAt" : 1507162713058,
+  "retrievedAtTime" : "2017-10-04T19:18:33.058"
+}
