@@ -28,6 +28,8 @@ public class RFIDApplication {
 	
 	private final ScheduledExecutorService backupExecutorService = Executors.newSingleThreadScheduledExecutor();
 	
+	private final EventHandler eh;
+	
 	public static void main(String[] args) {
 		LOGGER.info("RFID Interlock 2");
 		new RFIDApplication(args);
@@ -36,30 +38,39 @@ public class RFIDApplication {
 	public RFIDApplication(String[] args) {
 		loadConfig(args);
 		
-		Spark.port(Integer.parseInt(Configuration.getProperties().getProperty(Configuration.PORT, "8080")));
-		Spark.get("/status", InfoServer::status);
-		Spark.awaitInitialization();
-		LOGGER.logp(Level.INFO, CLAZZ, "main", "Server started on port " + Spark.port());
+		configureWebserver();
 		
 		client = new MakerTrackerClient();
 		client.configure(Configuration.getProperties());
 		
-		InterlockController.getInstance("1").configure(Configuration.getProperties());
+		//TODO Enable configuring more than one instance
+		InterlockController.getInstance(InterlockController.DEFAULT).configure(Configuration.getProperties());
 		
 		if (Boolean.parseBoolean(Configuration.getProperty(Configuration.ENABLE_BACKUP, "true"))) {
 			loadLastBackup();
 			setupBackupTask();
 		}
 		
+		eh = new EventHandler();
+		eh.configure(client, Configuration.getProperties());
+		
 		String rfidClass = Configuration.getProperty(Configuration.READER_IMPL, ConsoleReader.class.getName());
 		try {
 			RFIDReader rfidReader = (RFIDReader) Class.forName(rfidClass).newInstance();
-			rfidReader.configure(client, Configuration.getProperties());
+			rfidReader.configure(Configuration.getProperties());
+			rfidReader.addListener(eh);
 			rfidReader.start(); //loops continuously and blocks - needs to be last in startup
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 			LOGGER.logp(Level.SEVERE, CLAZZ, "main", "Error creating instance of " + rfidClass, e);
 			System.exit(1);
 		}
+	}
+
+	private void configureWebserver() {
+		Spark.port(Integer.parseInt(Configuration.getProperties().getProperty(Configuration.PORT, "8080")));
+		Spark.get("/status", InfoServer::status);
+		Spark.awaitInitialization();
+		LOGGER.logp(Level.INFO, CLAZZ, "main", "Server started on port " + Spark.port());
 	}
 
 	private void loadLastBackup() {
