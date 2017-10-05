@@ -52,6 +52,10 @@ public class InterlockController {
 	}
 
 	public void enable(long ms) {
+		if (ms < 0) {
+			System.out.println("Invalid access time: " + ms);
+			return;
+		}
 		System.out.println("Enabling Interlock access for " + ms + " ms");
 		
 		if (this.currentUnlockTask != null && !this.currentUnlockTask.isDone()) {
