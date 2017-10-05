@@ -15,6 +15,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 import com.mikelduke.rfid.interlock2.io.ConsoleReader;
 import com.mikelduke.rfid.interlock2.io.RFIDReader;
 import com.mikelduke.rfid.interlock2.makertracker.MakerTrackerClient;
+import com.mikelduke.rfid.interlock2.web.InfoServer;
 
 import spark.Spark;
 
@@ -22,7 +23,7 @@ public class RFIDApplication {
 	private static final String CLAZZ = RFIDApplication.class.getName();
 	private static final Logger LOGGER = Logger.getLogger(CLAZZ);
 	
-	private volatile AccessInfo accessInfo = null;
+	private volatile AccessInfo accessInfo = null; //TODO use backup when service not up
 	
 	private final AccessControlClient client;
 	

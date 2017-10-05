@@ -2,8 +2,8 @@ package com.mikelduke.servermock.makertracker;
 
 import java.util.Arrays;
 
-import com.mikelduke.rfid.interlock2.JsonTransformer;
 import com.mikelduke.rfid.interlock2.makertracker.MakerTrackerDTO;
+import com.mikelduke.rfid.interlock2.web.JsonTransformer;
 
 import spark.Spark;
 

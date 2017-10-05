@@ -1,4 +1,4 @@
-package com.mikelduke.rfid.interlock2;
+package com.mikelduke.rfid.interlock2.web;
 
 import spark.Request;
 import spark.Response;

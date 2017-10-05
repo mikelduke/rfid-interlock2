@@ -1,4 +1,4 @@
-package com.mikelduke.rfid.interlock2;
+package com.mikelduke.rfid.interlock2.web;
 
 import java.io.IOException;
 
